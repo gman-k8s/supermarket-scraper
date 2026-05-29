@@ -29,7 +29,6 @@ _F_ORIG_PRICE = "regularPrice"
 _F_DISCOUNT = "discount"
 _F_VALID_FROM = "validFrom"
 _F_VALID_TO = "validUntil"
-_F_RETAILER = "retailer"
 # ─────────────────────────────────────────────────────────────────────────────
 
 

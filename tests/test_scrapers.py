@@ -6,6 +6,7 @@ from pathlib import Path
 from datetime import date
 from unittest.mock import patch, MagicMock
 from scrapers.marktguru import MarktguruScraper
+from scrapers.aktionspreis import AktionsPreisScraper
 
 
 _FIXTURE_DIR = Path(__file__).parent / "fixtures"
@@ -50,9 +51,6 @@ def test_marktguru_live():
     assert isinstance(deals, list)
 
 
-from scrapers.aktionspreis import AktionsPreisScraper
-
-
 def _aktionspreis_fixture() -> dict:
     return json.loads((_FIXTURE_DIR / "aktionspreis_response.json").read_text())
 
@@ -70,6 +68,8 @@ def test_aktionspreis_deal_fields():
     assert isinstance(deal.price, float) and deal.price > 0
     assert deal.source == "aktionspreis"
     assert deal.store == "netto"
+    assert isinstance(deal.valid_from, date)
+    assert isinstance(deal.valid_to, date)
 
 
 def test_aktionspreis_fetch_calls_api():
