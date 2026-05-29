@@ -1,0 +1,12 @@
+[scraping]
+zip_code = "10115"
+
+[matching]
+threshold = 70
+
+[network]
+timeout_seconds = 10
+retries = 2
+
+[cache]
+ttl_days = 14
