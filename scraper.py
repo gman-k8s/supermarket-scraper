@@ -54,15 +54,16 @@ def main() -> None:
     cache.load()
     cache.expire()
 
-    new_deals = matched if args.force else [d for d in matched if not cache.contains(d.id)]
+    truly_new = [d for d in matched if not cache.contains(d.id)]
+    display_deals = matched if args.force else truly_new
 
-    for line in formatter.format_stdout_lines(new_deals):
+    for line in formatter.format_stdout_lines(display_deals):
         print(line)
 
     if not args.dry_run:
-        _OUTPUT_DIR.mkdir(exist_ok=True)
-        formatter.write_results_json(new_deals, _RESULTS_FILE)
-        cache.add_all([d.id for d in new_deals])
+        _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        formatter.write_results_json(display_deals, _RESULTS_FILE)
+        cache.add_all([d.id for d in truly_new])
         cache.save()
 
 

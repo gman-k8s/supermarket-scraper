@@ -64,7 +64,14 @@ class MarktguruScraper(BaseScraper):
                     timeout=self.timeout,
                 )
                 resp.raise_for_status()
-                return resp.json()
+                data = resp.json()
+                if not isinstance(data, dict):
+                    raise ScraperError(f"marktguru API returned unexpected type: {type(data).__name__}")
+                return data
+            except ScraperError:
+                raise
+            except ValueError as exc:
+                raise ScraperError(f"marktguru response is not valid JSON: {exc}") from exc
             except requests.RequestException as exc:
                 last_exc = exc
                 if attempt < self.retries:
@@ -84,7 +91,11 @@ class MarktguruScraper(BaseScraper):
         price = float(item[_F_PRICE][_F_PRICE_AMT])
 
         orig_raw = item.get(_F_ORIG_PRICE)
-        original_price = float(orig_raw[_F_PRICE_AMT]) if orig_raw else None
+        original_price = (
+            float(orig_raw[_F_PRICE_AMT])
+            if isinstance(orig_raw, dict) and _F_PRICE_AMT in orig_raw
+            else None
+        )
 
         discount_raw = item.get(_F_DISCOUNT)
         # discount is integer 0-100 (e.g. 38 means 38%) — verify against live API

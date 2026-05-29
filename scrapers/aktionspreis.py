@@ -60,7 +60,14 @@ class AktionsPreisScraper(BaseScraper):
                     timeout=self.timeout,
                 )
                 resp.raise_for_status()
-                return resp.json()
+                data = resp.json()
+                if not isinstance(data, dict):
+                    raise ScraperError(f"aktionspreis API returned unexpected type: {type(data).__name__}")
+                return data
+            except ScraperError:
+                raise
+            except ValueError as exc:
+                raise ScraperError(f"aktionspreis response is not valid JSON: {exc}") from exc
             except requests.RequestException as exc:
                 last_exc = exc
                 if attempt < self.retries:
