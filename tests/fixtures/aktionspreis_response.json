@@ -1,0 +1,26 @@
+{
+  "offers": [
+    {
+      "id": "ap_001",
+      "name": "Grillhähnchen",
+      "brand": "GutBio",
+      "price": 4.99,
+      "regularPrice": 6.99,
+      "discount": 29,
+      "validFrom": "2026-06-02",
+      "validUntil": "2026-06-07",
+      "retailer": "Netto"
+    },
+    {
+      "id": "ap_002",
+      "name": "Frische Vollmilch 1L",
+      "brand": null,
+      "price": 0.89,
+      "regularPrice": null,
+      "discount": null,
+      "validFrom": "2026-06-02",
+      "validUntil": "2026-06-07",
+      "retailer": "Netto"
+    }
+  ]
+}

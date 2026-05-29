@@ -1,0 +1,28 @@
+{
+  "results": [
+    {
+      "title": "Hähnchenfilet 500g",
+      "brand": {"name": "Metzgerfrisch"},
+      "price": {"amount": 2.49, "currency": "EUR"},
+      "priceNormal": {"amount": 3.99},
+      "discount": 38,
+      "validity": {
+        "from": "2026-06-02T00:00:00",
+        "to": "2026-06-07T23:59:59"
+      },
+      "company": {"name": "Lidl"}
+    },
+    {
+      "title": "Süßrahmbutter 250g",
+      "brand": {"name": "Milsani"},
+      "price": {"amount": 1.29, "currency": "EUR"},
+      "priceNormal": {"amount": 1.79},
+      "discount": 28,
+      "validity": {
+        "from": "2026-06-02T00:00:00",
+        "to": "2026-06-07T23:59:59"
+      },
+      "company": {"name": "Lidl"}
+    }
+  ]
+}
