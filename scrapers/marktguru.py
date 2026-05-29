@@ -1,4 +1,5 @@
 # scrapers/marktguru.py
+import sys
 import time
 import requests
 from datetime import date
@@ -40,6 +41,7 @@ class MarktguruScraper(BaseScraper):
         for store in self.stores:
             api_store = _STORE_MAP.get(store.lower())
             if api_store is None:
+                print(f"Warnung: Supermarkt '{store}' wird von marktguru nicht unterstützt.", file=sys.stderr)
                 continue
             data = self._request(api_store)
             deals.extend(self._parse(data, store))
@@ -53,7 +55,7 @@ class MarktguruScraper(BaseScraper):
             "limit": 100,
         }
         last_exc: Exception | None = None
-        for attempt in range(self.retries + 1):
+        for attempt in range(max(1, self.retries + 1)):
             try:
                 resp = requests.get(
                     f"{_BASE_URL}{_SEARCH_PATH}",
@@ -85,6 +87,7 @@ class MarktguruScraper(BaseScraper):
         original_price = float(orig_raw[_F_PRICE_AMT]) if orig_raw else None
 
         discount_raw = item.get(_F_DISCOUNT)
+        # discount is integer 0-100 (e.g. 38 means 38%) — verify against live API
         discount_pct = float(discount_raw) if discount_raw is not None else None
 
         validity = item[_F_VALIDITY]
