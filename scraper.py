@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+import os as _os, sys as _sys
+_venv_py = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), ".venv", "bin", "python")
+if not _os.path.exists(_venv_py):
+    _sys.exit("Error: .venv not found. Run: python -m venv .venv && pip install -r requirements.txt")
+if _os.path.realpath(_sys.executable) != _os.path.realpath(_venv_py):
+    _os.execv(_venv_py, [_venv_py] + _sys.argv)
+del _venv_py, _os, _sys
+
 import argparse
 import sys
 from pathlib import Path
@@ -35,6 +44,7 @@ def main() -> None:
         try:
             s = cls(
                 stores=supermarkets,
+                products=products,
                 timeout=net["timeout_seconds"],
                 retries=net["retries"],
                 zip_code=scrape["zip_code"],

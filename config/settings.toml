@@ -1,5 +1,5 @@
 [scraping]
-zip_code = "10115"
+zip_code = "56073"
 
 [matching]
 threshold = 70
@@ -9,4 +9,4 @@ timeout_seconds = 10
 retries = 2
 
 [cache]
-ttl_days = 14
+ttl_days = 7

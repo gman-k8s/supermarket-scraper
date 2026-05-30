@@ -1,5 +1,5 @@
 butter
 hähnchen
-milch
-joghurt
-käse
+magerquark
+gouda
+hackfleisch

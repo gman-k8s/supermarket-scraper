@@ -11,11 +11,13 @@ class BaseScraper(ABC):
     def __init__(
         self,
         stores: list[str],
+        products: list[str] | None = None,
         timeout: int = 10,
         retries: int = 2,
         zip_code: str = "10115",
     ):
         self.stores = stores
+        self.products = products or []
         self.timeout = timeout
         self.retries = retries
         self.zip_code = zip_code

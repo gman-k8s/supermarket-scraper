@@ -17,7 +17,10 @@ def format_stdout_lines(deals: list[Deal]) -> list[str]:
         return ["Keine neuen Angebote gefunden."]
     lines = []
     for deal in deals:
-        name = f"{deal.brand} {deal.product_name}" if deal.brand else deal.product_name
+        if deal.brand and not deal.product_name.lower().startswith(deal.brand.lower()):
+            name = f"{deal.brand} {deal.product_name}"
+        else:
+            name = deal.product_name
         price_str = _fmt_price(deal.price)
         if deal.original_price is not None and deal.discount_pct is not None:
             discount_part = f" (statt {_fmt_price(deal.original_price)}, -{deal.discount_pct:.0f}%)"

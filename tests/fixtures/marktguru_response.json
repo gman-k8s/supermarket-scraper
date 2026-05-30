@@ -1,28 +1,29 @@
 {
+  "filters": null,
+  "totalResults": 2,
+  "skippedResults": 0,
   "results": [
     {
-      "title": "Hähnchenfilet 500g",
-      "brand": {"name": "Metzgerfrisch"},
-      "price": {"amount": 2.49, "currency": "EUR"},
-      "priceNormal": {"amount": 3.99},
-      "discount": 38,
-      "validity": {
-        "from": "2026-06-02T00:00:00",
-        "to": "2026-06-07T23:59:59"
-      },
-      "company": {"name": "Lidl"}
+      "brand": {"id": 114401, "name": "Arla", "uniqueName": "arla"},
+      "advertisers": [{"id": "retailers/126679", "name": "Lidl", "uniqueName": "lidl"}],
+      "categories": [{"id": 166, "name": "Butter"}],
+      "id": 23437844,
+      "description": "Versch. Sorten. Gekühlt. Je 250/200 g",
+      "price": 1.49,
+      "oldPrice": null,
+      "validityDates": [{"from": "2026-05-31T22:00:00Z", "to": "2026-06-06T21:59:59Z"}],
+      "product": {"id": 120007, "name": "Kaergarden"}
     },
     {
-      "title": "Süßrahmbutter 250g",
-      "brand": {"name": "Milsani"},
-      "price": {"amount": 1.29, "currency": "EUR"},
-      "priceNormal": {"amount": 1.79},
-      "discount": 28,
-      "validity": {
-        "from": "2026-06-02T00:00:00",
-        "to": "2026-06-07T23:59:59"
-      },
-      "company": {"name": "Lidl"}
+      "brand": {"id": 118049, "name": "Meggle", "uniqueName": "meggle"},
+      "advertisers": [{"id": "retailers/126679", "name": "Lidl", "uniqueName": "lidl"}],
+      "categories": [{"id": 166, "name": "Butter"}],
+      "id": 23437610,
+      "description": "Versch. Sorten. Gekühlt. Je 400 g",
+      "price": 2.29,
+      "oldPrice": null,
+      "validityDates": [{"from": "2026-06-02T22:00:00Z", "to": "2026-06-06T21:59:00Z"}],
+      "product": {"id": 143464, "name": "Streichzart"}
     }
   ]
 }
