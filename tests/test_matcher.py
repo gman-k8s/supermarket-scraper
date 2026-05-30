@@ -79,3 +79,16 @@ def test_no_exclusions_no_change():
     deals = [_deal("Buttermilch 500ml")]
     result = match_deals(deals, ["butter"], threshold=70)
     assert len(result) == 1
+
+
+def test_exclusion_case_insensitive_term():
+    deals = [_deal("Buttermilch 500ml"), _deal("Butter 250g")]
+    result = match_deals(deals, ["butter"], threshold=70, exclusions={"butter": ["ButterMilch"]})
+    assert len(result) == 1
+    assert result[0].product_name == "Butter 250g"
+
+
+def test_exclusion_fallthrough_to_second_keyword():
+    deals = [_deal("Buttermilch Schokolade 200g")]
+    result = match_deals(deals, ["butter", "schokolade"], threshold=70, exclusions={"butter": ["buttermilch"]})
+    assert len(result) == 1

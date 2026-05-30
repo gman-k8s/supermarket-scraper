@@ -21,7 +21,7 @@ def match_deals(
                 if not _is_excluded(deal, exclusions.get(keyword, [])):
                     matched.append(deal)
                     seen_ids.add(deal.id)
-                break  # first matching keyword is authoritative
+                    break  # first non-excluded match is authoritative
     return matched
 
 
@@ -41,4 +41,4 @@ def _matches(deal: Deal, keywords: list[str], threshold: int) -> bool:
 
 def _is_excluded(deal: Deal, terms: list[str]) -> bool:
     haystack = " ".join(filter(None, [deal.product_name, deal.brand])).lower()
-    return any(t in haystack for t in terms)
+    return any(t.lower() in haystack for t in terms)
