@@ -1,7 +1,7 @@
 # Per-keyword exclusion list.
 # Format: keyword: "term1", "term2"
 # Matching is case-insensitive substring against product_name and brand.
-butter: "buttermilch", "butter milch", "vegane", "buttercroissant", "milchstreichfett"
+butter: "buttermilch", "butter milch", "vegane", "buttercroissant", "mischstreichfett"
 hackfleisch: "cevapcici", "schweine", "burger", "gemischt"
 hähnchen: "schenkel", "kebap", "wurstaufschnitt"
 protein: "ehrmann"
