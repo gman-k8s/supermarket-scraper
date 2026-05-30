@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 try:
@@ -21,3 +22,17 @@ def load_supermarkets() -> list[str]:
 def load_settings() -> dict:
     with open(_CONFIG_DIR / "settings.toml", "rb") as f:
         return tomllib.load(f)
+
+
+def load_exclusions() -> dict[str, list[str]]:
+    path = _CONFIG_DIR / "exclusions.txt"
+    if not path.exists():
+        return {}
+    result: dict[str, list[str]] = {}
+    for line in path.read_text("utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        keyword, _, rest = line.partition(":")
+        result[keyword.strip().lower()] = [t.lower() for t in re.findall(r'"([^"]+)"', rest)]
+    return result
