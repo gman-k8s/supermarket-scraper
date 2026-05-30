@@ -63,7 +63,7 @@ def main() -> None:
     if not args.dry_run:
         _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         formatter.write_results_json(display_deals, _RESULTS_FILE)
-        cache.add_all([d.id for d in truly_new])
+        cache.add_all([d.id for d in display_deals])
         cache.save()
 
 

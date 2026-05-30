@@ -45,8 +45,25 @@ def test_cached_deal_is_skipped(capsys):
 
 
 def test_force_flag_reports_cached_deal(capsys):
-    _run(extra_argv=["--force"], cached=True)
+    mock_add_all = MagicMock()
+    deals = _fake_deals()
+    with (
+        patch("scrapers.marktguru.MarktguruScraper.fetch", return_value=deals),
+        patch("scrapers.aktionspreis.AktionsPreisScraper.fetch", return_value=[]),
+        patch("cache.Cache.load"),
+        patch("cache.Cache.expire"),
+        patch("cache.Cache.contains", return_value=True),
+        patch("cache.Cache.save"),
+        patch("cache.Cache.add_all", mock_add_all),
+        patch("formatter.write_results_json"),
+        patch("pathlib.Path.mkdir"),
+        patch("sys.argv", ["scraper.py", "--force"]),
+    ):
+        import scraper
+        importlib.reload(scraper)
+        scraper.main()
     assert "LIDL" in capsys.readouterr().out
+    mock_add_all.assert_called_once_with([deals[0].id])
 
 
 def test_both_scrapers_fail_exits_1():
