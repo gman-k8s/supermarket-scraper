@@ -16,6 +16,7 @@ from cache import Cache
 from config import load_exclusions, load_products, load_settings, load_supermarkets
 from matcher import match_deals
 from models import Deal
+from price_db import PriceDB
 from scrapers.aktionspreis import AktionsPreisScraper
 from scrapers.base import ScraperError
 from scrapers.marktguru import MarktguruScraper
@@ -23,6 +24,7 @@ from scrapers.marktguru import MarktguruScraper
 _OUTPUT_DIR = Path(__file__).parent / "output"
 _CACHE_FILE = _OUTPUT_DIR / "cache.json"
 _RESULTS_FILE = _OUTPUT_DIR / "results.json"
+_PRICE_DB_FILE = _OUTPUT_DIR / "price_history.db"
 
 
 def main() -> None:
@@ -76,6 +78,7 @@ def main() -> None:
         formatter.write_results_json(display_deals, _RESULTS_FILE)
         cache.add_all([d.id for d in display_deals])
         cache.save()
+        PriceDB(_PRICE_DB_FILE).save_all(all_deals)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ class Deal:
     valid_to: date
     source: str
     brand: str | None = None
+    ean: str | None = None
     original_price: float | None = None
     discount_pct: float | None = None
     id: str = field(init=False)
@@ -27,6 +28,7 @@ class Deal:
             "id": self.id,
             "store": self.store,
             "brand": self.brand,
+            "ean": self.ean,
             "product_name": self.product_name,
             "price": self.price,
             "original_price": self.original_price,

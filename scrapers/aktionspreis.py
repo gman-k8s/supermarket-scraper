@@ -90,6 +90,14 @@ class AktionsPreisScraper(BaseScraper):
         manufacturer = product.get("manufacturer") or {}
         brand = manufacturer.get("name") if isinstance(manufacturer, dict) else None
 
+        ean = (
+            product.get("gtin13")
+            or product.get("gtin12")
+            or product.get("gtin8")
+            or product.get("gtin")
+            or None
+        )
+
         deals: list[Deal] = []
         for event in sale_events:
             organizer = event.get("organizer") or {}
@@ -112,6 +120,7 @@ class AktionsPreisScraper(BaseScraper):
                 valid_to=valid_to,
                 source="aktionspreis",
                 brand=brand,
+                ean=ean,
             ))
         return deals
 

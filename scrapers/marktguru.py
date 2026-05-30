@@ -116,6 +116,15 @@ class MarktguruScraper(BaseScraper):
         category_name = categories[0].get("name", "") if categories else ""
         product_name = f"{category_name} {product_info.get('name', '')}".strip() or item.get("description", "")
 
+        ean = (
+            product_info.get("gtin")
+            or product_info.get("ean")
+            or product_info.get("barcode")
+            or item.get("gtin")
+            or item.get("ean")
+            or None
+        )
+
         return Deal(
             store=store,
             product_name=product_name,
@@ -126,4 +135,5 @@ class MarktguruScraper(BaseScraper):
             valid_to=valid_to,
             source="marktguru",
             brand=brand,
+            ean=ean,
         )

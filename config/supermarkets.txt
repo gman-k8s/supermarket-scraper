@@ -1,3 +1,7 @@
 lidl
 aldi
 netto
+hit
+globus
+rewe
+dm
