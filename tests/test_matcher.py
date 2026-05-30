@@ -47,3 +47,35 @@ def test_empty_watchlist_returns_empty():
 
 def test_empty_deals_returns_empty():
     assert match_deals([], ["butter"], threshold=70) == []
+
+
+def test_exclusion_removes_buttermilch():
+    deals = [_deal("Buttermilch 500ml"), _deal("Butter 250g")]
+    result = match_deals(deals, ["butter"], threshold=70, exclusions={"butter": ["buttermilch"]})
+    assert len(result) == 1
+    assert result[0].product_name == "Butter 250g"
+
+
+def test_multiword_exclusion():
+    deals = [_deal("Butter Milch 1L"), _deal("Butter 250g")]
+    result = match_deals(deals, ["butter"], threshold=70, exclusions={"butter": ["butter milch"]})
+    assert len(result) == 1
+    assert result[0].product_name == "Butter 250g"
+
+
+def test_exclusion_on_brand():
+    deals = [_deal("Frischeprodukt 500ml", brand="Buttermilch Brand")]
+    result = match_deals(deals, ["butter"], threshold=70, exclusions={"butter": ["buttermilch"]})
+    assert len(result) == 0
+
+
+def test_exclusion_only_applies_to_its_keyword():
+    deals = [_deal("Buttermilch 500ml")]
+    result = match_deals(deals, ["milch"], threshold=70, exclusions={"butter": ["buttermilch"]})
+    assert len(result) == 1
+
+
+def test_no_exclusions_no_change():
+    deals = [_deal("Buttermilch 500ml")]
+    result = match_deals(deals, ["butter"], threshold=70)
+    assert len(result) == 1
