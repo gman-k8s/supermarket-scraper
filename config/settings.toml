@@ -1,5 +1,5 @@
 [scraping]
-zip_code = "56073"
+zip_code = "60311"
 
 [matching]
 threshold = 70

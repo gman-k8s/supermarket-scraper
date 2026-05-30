@@ -14,45 +14,95 @@ def _deal(
                 brand=brand, original_price=original_price, discount_pct=discount_pct)
 
 
-def test_line_contains_store_uppercase():
-    assert "[LIDL]" in format_stdout_lines([_deal()])[0]
+def _all_lines(deals, products=None):
+    return format_stdout_lines(deals, products)
 
 
-def test_line_contains_brand_and_product_name():
-    line = format_stdout_lines([_deal()])[0]
-    assert "Metzgerfrisch" in line
-    assert "Hähnchenfilet 500g" in line
+def test_store_header_uppercase():
+    lines = _all_lines([_deal()])
+    assert "=== LIDL ===" in lines
 
 
-def test_line_german_price_format():
-    line = format_stdout_lines([_deal(price=2.49, original_price=3.99)])[0]
-    assert "2,49€" in line
-    assert "3,99€" in line
+def test_deal_line_contains_brand_and_product_name():
+    lines = _all_lines([_deal()])
+    deal_line = next(l for l in lines if "Hähnchenfilet" in l)
+    assert "Metzgerfrisch" in deal_line
+    assert "Hähnchenfilet 500g" in deal_line
 
 
-def test_line_discount_percent():
-    assert "-38%" in format_stdout_lines([_deal(discount_pct=38.0)])[0]
+def test_deal_line_german_price_format():
+    lines = _all_lines([_deal(price=2.49, original_price=3.99)])
+    deal_line = next(l for l in lines if "2,49€" in l)
+    assert "3,99€" in deal_line
 
 
-def test_line_german_date_range():
-    line = format_stdout_lines([_deal(valid_from=date(2026, 6, 2), valid_to=date(2026, 6, 7))])[0]
-    assert "02.06" in line
-    assert "07.06" in line
+def test_deal_line_discount_percent():
+    lines = _all_lines([_deal(discount_pct=38.0)])
+    assert any("-38%" in l for l in lines)
 
 
-def test_line_no_brand_omits_brand_prefix():
+def test_deal_line_german_date_range():
+    lines = _all_lines([_deal(valid_from=date(2026, 6, 2), valid_to=date(2026, 6, 7))])
+    deal_line = next(l for l in lines if "02.06" in l)
+    assert "07.06" in deal_line
+
+
+def test_deal_line_no_gultig():
+    lines = _all_lines([_deal()])
+    assert not any("gültig" in l for l in lines)
+
+
+def test_deal_line_no_brand_omits_brand_prefix():
     deal = Deal("aldi", "Butter 250g", 1.29, date(2026, 6, 2), date(2026, 6, 7), "marktguru")
-    line = format_stdout_lines([deal])[0]
-    assert "Butter 250g" in line
+    lines = _all_lines([deal])
+    deal_line = next(l for l in lines if "Butter 250g" in l)
+    assert "Butter 250g" in deal_line
 
 
-def test_line_no_original_price_omits_statt():
+def test_deal_line_no_original_price_omits_statt():
     deal = Deal("aldi", "Butter 250g", 1.29, date(2026, 6, 2), date(2026, 6, 7), "marktguru")
-    assert "statt" not in format_stdout_lines([deal])[0]
+    assert not any("statt" in l for l in _all_lines([deal]))
 
 
 def test_empty_deals_returns_no_results_message():
     assert format_stdout_lines([]) == ["Keine neuen Angebote gefunden."]
+
+
+def test_groups_by_store():
+    deals = [
+        _deal(store="aldi", name="Butter"),
+        _deal(store="lidl", name="Gouda"),
+        _deal(store="aldi", name="Quark"),
+    ]
+    lines = _all_lines(deals)
+    aldi_idx = lines.index("=== ALDI ===")
+    lidl_idx = lines.index("=== LIDL ===")
+    # ALDI comes before LIDL alphabetically
+    assert aldi_idx < lidl_idx
+    # Both ALDI deals appear before LIDL header
+    aldi_deals = [l for l in lines[aldi_idx:lidl_idx] if l.strip() and "===" not in l]
+    assert len(aldi_deals) == 2
+
+
+def test_coverage_section_with_products():
+    deals = [
+        _deal(store="lidl", name="Hähnchenfilet", brand=None),
+        _deal(store="aldi", name="Butter 250g", brand=None),
+    ]
+    products = ["hähnchen", "butter", "gouda"]
+    lines = _all_lines(deals, products)
+    assert "--- Abdeckung ---" in lines
+    lidl_cov = next(l for l in lines if l.strip().startswith("LIDL:"))
+    assert "1/3" in lidl_cov
+    assert "hähnchen" in lidl_cov
+    aldi_cov = next(l for l in lines if l.strip().startswith("ALDI:"))
+    assert "1/3" in aldi_cov
+    assert "butter" in aldi_cov
+
+
+def test_no_coverage_section_without_products():
+    lines = _all_lines([_deal()])
+    assert not any("Abdeckung" in l for l in lines)
 
 
 def test_write_results_json(tmp_path):
