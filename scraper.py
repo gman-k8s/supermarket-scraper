@@ -13,7 +13,7 @@ from pathlib import Path
 
 import formatter
 from cache import Cache
-from config import load_products, load_settings, load_supermarkets
+from config import load_exclusions, load_products, load_settings, load_supermarkets
 from matcher import match_deals
 from models import Deal
 from scrapers.aktionspreis import AktionsPreisScraper
@@ -33,6 +33,7 @@ def main() -> None:
 
     settings = load_settings()
     products = load_products()
+    exclusions = load_exclusions()
     supermarkets = load_supermarkets()
     net = settings["network"]
     scrape = settings["scraping"]
@@ -58,7 +59,7 @@ def main() -> None:
         print("Fehler: Alle Quellen nicht erreichbar.", file=sys.stderr)
         sys.exit(1)
 
-    matched = match_deals(all_deals, products, threshold=settings["matching"]["threshold"])
+    matched = match_deals(all_deals, products, threshold=settings["matching"]["threshold"], exclusions=exclusions)
 
     cache = Cache(cache_file=_CACHE_FILE, ttl_days=settings["cache"]["ttl_days"])
     cache.load()
@@ -67,7 +68,7 @@ def main() -> None:
     truly_new = [d for d in matched if not cache.contains(d.id)]
     display_deals = matched if args.force else truly_new
 
-    for line in formatter.format_stdout_lines(display_deals):
+    for line in formatter.format_stdout_lines(display_deals, products):
         print(line)
 
     if not args.dry_run:
