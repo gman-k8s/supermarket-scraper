@@ -16,8 +16,12 @@ _HEADERS: dict[str, str] = {
 
 
 class MarktguruScraper(BaseScraper):
+    name = "marktguru"
+
     def fetch(self) -> list[Deal]:
-        client_key = self._get_client_key()
+        if getattr(self, "_client_key", None) is None:
+            self._client_key = self._get_client_key()
+        client_key = self._client_key
         headers = {**_HEADERS, "X-ClientKey": client_key}
         deals: list[Deal] = []
         for product in self.products:

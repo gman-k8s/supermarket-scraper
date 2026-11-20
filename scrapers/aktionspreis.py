@@ -19,6 +19,8 @@ _MAX_OFFERS_PER_PRODUCT = 20
 
 
 class AktionsPreisScraper(BaseScraper):
+    name = "aktionspreis"
+
     def fetch(self) -> list[Deal]:
         deals: list[Deal] = []
         seen_slugs: set[str] = set()

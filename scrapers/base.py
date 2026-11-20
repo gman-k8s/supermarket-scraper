@@ -8,6 +8,8 @@ class ScraperError(Exception):
 
 
 class BaseScraper(ABC):
+    name: str = ""
+
     def __init__(
         self,
         stores: list[str],

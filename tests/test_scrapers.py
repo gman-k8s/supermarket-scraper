@@ -199,3 +199,16 @@ def test_aktionspreis_live():
     scraper = AktionsPreisScraper(stores=["netto"], products=["butter"], zip_code="56073")
     deals = scraper.fetch()
     assert isinstance(deals, list)
+
+
+def test_marktguru_client_key_fetched_once():
+    scraper = _make_marktguru()
+    mock_config = MagicMock()
+    mock_config.headers = {"x-clientkey": "testkey123"}
+    mock_search = MagicMock()
+    mock_search.json.return_value = _marktguru_fixture()
+    with patch("scrapers.marktguru.requests.get", side_effect=[mock_config, mock_search, mock_search]) as mock_get:
+        scraper.fetch()
+        scraper.fetch()
+    config_calls = [c for c in mock_get.call_args_list if "/configurations/web" in c.args[0]]
+    assert len(config_calls) == 1
