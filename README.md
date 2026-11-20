@@ -13,10 +13,17 @@ Requires Python 3.10+ and [uv](https://github.com/astral-sh/uv). The script crea
 ## Usage
 
 ```bash
-.venv/bin/python scraper.py            # print new deals since last run
-.venv/bin/python scraper.py --force    # print all matching deals, ignore cache
-.venv/bin/python scraper.py --dry-run  # print without writing cache or results.json
+.venv/bin/python scraper.py                       # print new deals since last run
+.venv/bin/python scraper.py --all                 # print all matching deals (from text cache)
+.venv/bin/python scraper.py --force               # reload everything online, print all matching deals
+.venv/bin/python scraper.py --terms "kaffee,eier" # search extra terms in addition to products.txt
+.venv/bin/python scraper.py --json                # all deals per term as JSON (no matching, no seen-cache)
+.venv/bin/python scraper.py --dry-run             # don't write any cache, results.json or price DB
 ```
+
+Deals are cached per search term in `output/deals/<term>.txt` (header + TSV). By default a term is read from
+that file; it is reloaded online only if missing, older than `cache.deals_max_age_days` (default 7), or with
+`--force`. A file is only written when both sources answered for that term.
 
 Output is German-formatted to stdout. Results are also written to `output/results.json`, and every scraped deal is recorded in `output/price_history.db` (SQLite).
 
@@ -52,6 +59,7 @@ retries = 2
 
 [cache]
 ttl_days = 14
+deals_max_age_days = 7
 ```
 
 ## Data sources

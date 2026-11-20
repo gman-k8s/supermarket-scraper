@@ -10,3 +10,4 @@ retries = 2
 
 [cache]
 ttl_days = 14
+deals_max_age_days = 7   # text cache output/deals/<term>.txt older than this is reloaded
