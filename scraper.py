@@ -51,6 +51,8 @@ def main() -> None:
     parser.add_argument("--json", action="store_true",
                         help="Print all deals per term as JSON (no matching, no seen-cache)")
     parser.add_argument("--dry-run", action="store_true", help="Print matches, skip cache/file writes")
+    parser.add_argument("--deadline", type=float, default=None,
+                        help="Stop fetching online after N seconds; remaining terms come from cache (0 = cache only)")
     args = parser.parse_args()
 
     settings = load_settings()
@@ -69,10 +71,12 @@ def main() -> None:
     ]
     now = datetime.now()
     result = load_deals(terms, scrapers, _DEALS_DIR, force=args.force, max_age_days=max_age,
-                        write_cache=not args.dry_run, now=now)
+                        write_cache=not args.dry_run, now=now, deadline=args.deadline)
 
     for w in result.warnings:
         print(f"Warnung: {w}", file=sys.stderr)
+    if result.skipped:
+        print(f"Warnung: Zeitlimit erreicht, nicht geladen: {', '.join(result.skipped)}", file=sys.stderr)
     if result.all_sources_failed:
         print("Fehler: Alle Quellen nicht erreichbar.", file=sys.stderr)
         sys.exit(1)
@@ -93,6 +97,7 @@ def main() -> None:
                 for term, tr in result.terms.items()
             },
             "warnings": result.warnings,
+            "skipped": result.skipped,
         }
         json.dump(payload, sys.stdout, ensure_ascii=False)
         print()

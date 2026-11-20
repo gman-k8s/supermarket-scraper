@@ -1,7 +1,9 @@
 """Load deals per search term, using the text cache when fresh."""
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from typing import Callable
 
 from deal_cache import is_fresh, read_term, write_term
 from models import Deal
@@ -21,6 +23,7 @@ class LoadResult:
     warnings: list[str]
     online_deals: list[Deal]
     all_sources_failed: bool
+    skipped: list[str] = field(default_factory=list)  # deadline hit, no cache file
 
 
 def load_deals(
@@ -32,16 +35,27 @@ def load_deals(
     max_age_days: int,
     write_cache: bool,
     now: datetime,
+    deadline: float | None = None,
+    clock: Callable[[], float] = time.monotonic,
 ) -> LoadResult:
+    """deadline: seconds after which no further term is fetched online (0 = cache only)."""
     result = LoadResult(terms={}, warnings=[], online_deals=[], all_sources_failed=False)
     succeeded_sources: set[str] = set()
     fetched_any = False
     unrecovered_terms = 0  # online fetch fully failed and no cache file to fall back on
+    start = clock()
 
     for term in terms:
         cached = read_term(cache_dir, term, now.date())
         if not force and cached is not None and is_fresh(cached, now, max_age_days):
             result.terms[term] = TermResult(cached.deals, cached.fetched, from_cache=True)
+            continue
+
+        if deadline is not None and clock() - start >= deadline:
+            if cached is not None:
+                result.terms[term] = TermResult(cached.deals, cached.fetched, from_cache=True)
+            else:
+                result.skipped.append(term)
             continue
 
         fetched_any = True

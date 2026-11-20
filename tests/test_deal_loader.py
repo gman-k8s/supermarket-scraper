@@ -136,3 +136,39 @@ def test_expired_online_deals_dropped(tmp_path):
     r = _load(tmp_path, ["milch"], [a])
     assert [d.product_name for d in r.terms["milch"].deals] == ["Aktuell"]
     assert [d.product_name for d in r.online_deals] == ["Aktuell"]
+
+
+class FakeClock:
+    def __init__(self, step: float):
+        self.t = 0.0
+        self.step = step
+
+    def __call__(self) -> float:
+        self.t += self.step
+        return self.t
+
+
+def test_deadline_zero_reads_stale_cache_and_skips_missing(tmp_path):
+    write_term(tmp_path, "milch", [_deal("Old")], ["marktguru"], NOW - timedelta(days=30))
+    a = FakeScraper("marktguru", {"eier": [_deal("Eier")]})
+    r = _load(tmp_path, ["milch", "eier"], [a], deadline=0)
+    assert a.calls == []
+    assert r.terms["milch"].from_cache is True
+    assert [d.product_name for d in r.terms["milch"].deals] == ["Old"]
+    assert "eier" not in r.terms
+    assert r.skipped == ["eier"]
+    assert r.all_sources_failed is False
+
+
+def test_deadline_stops_fetching_after_budget(tmp_path):
+    a = FakeScraper("marktguru", {t: [_deal(t)] for t in ("a", "b", "c")})
+    r = _load(tmp_path, ["a", "b", "c"], [a], deadline=25, clock=FakeClock(step=10))
+    assert a.calls == [["a"], ["b"]]
+    assert r.skipped == ["c"]
+
+
+def test_no_deadline_fetches_everything(tmp_path):
+    a = FakeScraper("marktguru", {t: [_deal(t)] for t in ("a", "b")})
+    r = _load(tmp_path, ["a", "b"], [a])
+    assert r.skipped == []
+    assert len(a.calls) == 2

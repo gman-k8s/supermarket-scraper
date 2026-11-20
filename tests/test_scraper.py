@@ -195,3 +195,12 @@ def test_dry_run_writes_no_text_cache():
 def _fake_deals_current() -> list[Deal]:
     today = date.today()
     return [Deal("lidl", "Hähnchenfilet 500g", 2.49, today, today, "marktguru", brand="Metzgerfrisch")]
+
+
+def test_deadline_zero_json_lists_skipped(capsys):
+    fetch = MagicMock(return_value=[])
+    _run_with(_std_patches(["--json", "--deadline", "0", "--terms", "kaffee"], fetch=fetch))
+    data = json.loads(capsys.readouterr().out)
+    fetch.assert_not_called()
+    assert "kaffee" in data["skipped"]
+    assert "kaffee" not in data["terms"]

@@ -19,6 +19,7 @@ Requires Python 3.10+ and [uv](https://github.com/astral-sh/uv). The script crea
 .venv/bin/python scraper.py --terms "kaffee,eier" # search extra terms in addition to products.txt
 .venv/bin/python scraper.py --json                # all deals per term as JSON (no matching, no seen-cache)
 .venv/bin/python scraper.py --dry-run             # don't write any cache, results.json or price DB
+.venv/bin/python scraper.py --deadline 30         # stop fetching online after 30 s, rest from cache (0 = cache only)
 ```
 
 Deals are cached per search term in `output/deals/<term>.txt` (header + TSV). By default a term is read from
