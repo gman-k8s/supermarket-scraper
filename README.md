@@ -8,7 +8,7 @@ Scrapes German supermarket deal sites (marktguru.de, aktionspreis.de) for produc
 bash setup-venv.sh
 ```
 
-Requires Python 3.10+ and [uv](https://github.com/astral-sh/uv).
+Requires Python 3.10+ and [uv](https://github.com/astral-sh/uv). The script creates `.venv`, installs runtime and dev dependencies, and copies any missing config files from `config.example/` into `config/` (existing files are never overwritten).
 
 ## Usage
 
@@ -18,15 +18,18 @@ Requires Python 3.10+ and [uv](https://github.com/astral-sh/uv).
 .venv/bin/python scraper.py --dry-run  # print without writing cache or results.json
 ```
 
-Output is German-formatted to stdout. Results are also written to `output/results.json`.
+Output is German-formatted to stdout. Results are also written to `output/results.json`, and every scraped deal is recorded in `output/price_history.db` (SQLite).
 
 ## Configuration
+
+`config/` is gitignored so your watchlist stays local. Templates live in `config.example/`.
 
 | File | Purpose |
 |------|---------|
 | `config/products.txt` | One keyword per line — deals are matched against these (fuzzy, case-insensitive) |
 | `config/supermarkets.txt` | One store name per line — filters results to these chains |
 | `config/settings.toml` | Zip code, match threshold, network timeouts, cache TTL |
+| `config/exclusions.txt` | Optional per-keyword exclusion terms, e.g. `butter: "buttermilch", "vegane"` |
 
 Example `products.txt`:
 ```
@@ -51,15 +54,12 @@ retries = 2
 ttl_days = 14
 ```
 
-## API Discovery (required before first run)
+## Data sources
 
-The scrapers use placeholder API endpoints. Before running against live data, discover the real endpoints:
+- **marktguru.de** — public JSON API (`scrapers/marktguru.py`)
+- **aktionspreis.de** — HTML search pages plus JSON-LD on offer pages (`scrapers/aktionspreis.py`)
 
-1. Open marktguru.de in a browser, open DevTools → Network tab
-2. Filter for XHR/Fetch requests, find the search API call
-3. Update `_BASE_URL` and `_SEARCH_PATH` constants at the top of `scrapers/marktguru.py`
-4. Repeat for aktionspreis.de → `scrapers/aktionspreis.py`
-5. Replace `tests/fixtures/` files with real API response samples
+If a site changes its API or markup, update the scraper and refresh the matching sample in `tests/fixtures/`.
 
 ## Testing
 
@@ -67,4 +67,8 @@ The scrapers use placeholder API endpoints. Before running against live data, di
 .venv/bin/python -m pytest
 ```
 
-47 tests, 2 skipped (live network — run with `-m live` when real endpoints are configured).
+Live network tests are skipped by default. Run them with:
+
+```bash
+LIVE_TESTS=1 .venv/bin/python -m pytest tests/test_scrapers.py
+```
