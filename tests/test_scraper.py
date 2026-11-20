@@ -2,7 +2,7 @@ import importlib
 import sys
 import pytest
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from unittest.mock import MagicMock, patch
 from models import Deal
 from scrapers.base import ScraperError
@@ -28,7 +28,7 @@ def _reload_and_main():
 
 def _fake_deals() -> list[Deal]:
     return [
-        Deal("lidl", "Hähnchenfilet 500g", 2.49, date(2026, 6, 2), date(2026, 6, 7), "marktguru",
+        Deal("lidl", "Hähnchenfilet 500g", 2.49, date.today(), date.today() + timedelta(days=5), "marktguru",
              brand="Metzgerfrisch", original_price=3.99, discount_pct=38.0),
     ]
 

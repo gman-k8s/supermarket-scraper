@@ -36,6 +36,7 @@ def load_deals(
     result = LoadResult(terms={}, warnings=[], online_deals=[], all_sources_failed=False)
     succeeded_sources: set[str] = set()
     fetched_any = False
+    unrecovered_terms = 0  # online fetch fully failed and no cache file to fall back on
 
     for term in terms:
         cached = read_term(cache_dir, term, now.date())
@@ -46,24 +47,38 @@ def load_deals(
         fetched_any = True
         deals: list[Deal] = []
         ok_sources: list[str] = []
+        failed_sources: list[str] = []
         for s in scrapers:
             s.products = [term]
             try:
-                deals.extend(s.fetch())
+                deals.extend(d for d in s.fetch() if d.valid_to >= now.date())
                 ok_sources.append(s.name)
                 succeeded_sources.add(s.name)
             except ScraperError as exc:
+                failed_sources.append(s.name)
                 result.warnings.append(f"{s.name} ({term}): {exc}")
 
-        if not ok_sources and cached is not None:
-            result.warnings.append(f"{term}: verwende zwischengespeicherte Angebote vom {cached.fetched:%d.%m.}")
-            result.terms[term] = TermResult(cached.deals, cached.fetched, from_cache=True)
+        if not ok_sources:
+            if cached is not None:
+                result.warnings.append(f"{term}: verwende zwischengespeicherte Angebote vom {cached.fetched:%d.%m.}")
+                result.terms[term] = TermResult(cached.deals, cached.fetched, from_cache=True)
+            else:
+                unrecovered_terms += 1
+                result.terms[term] = TermResult([], now, from_cache=False)
+            continue
+
+        result.online_deals.extend(deals)
+        if failed_sources and cached is not None:
+            # keep the failed sources' still-valid deals from the old file
+            merged = deals + [d for d in cached.deals if d.source in failed_sources]
+            result.terms[term] = TermResult(merged, now, from_cache=False)
+            if write_cache:
+                write_term(cache_dir, term, merged, ok_sources + failed_sources, now)
             continue
 
         result.terms[term] = TermResult(deals, now, from_cache=False)
-        result.online_deals.extend(deals)
-        if write_cache and len(ok_sources) == len(scrapers):
+        if write_cache and not failed_sources:
             write_term(cache_dir, term, deals, ok_sources, now)
 
-    result.all_sources_failed = fetched_any and not succeeded_sources
+    result.all_sources_failed = fetched_any and not succeeded_sources and unrecovered_terms > 0
     return result

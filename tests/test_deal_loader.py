@@ -110,3 +110,29 @@ def test_online_deals_collected(tmp_path):
     a = FakeScraper("marktguru", {"eier": [_deal("Eier")]})
     r = _load(tmp_path, ["milch", "eier"], [a])
     assert [d.product_name for d in r.online_deals] == ["Eier"]
+
+
+def test_partial_failure_merges_cached_deals_of_failed_source(tmp_path):
+    write_term(tmp_path, "milch", [_deal("Old MG"), _deal("Old AP", "aktionspreis")], ["marktguru", "aktionspreis"],
+               NOW - timedelta(days=8))
+    a = FakeScraper("marktguru", {"milch": [_deal("New MG")]})
+    b = FakeScraper("aktionspreis", fail=True)
+    r = _load(tmp_path, ["milch"], [a, b])
+    assert sorted(d.product_name for d in r.terms["milch"].deals) == ["New MG", "Old AP"]
+    cached = read_term(tmp_path, "milch", NOW.date())
+    assert sorted(d.product_name for d in cached.deals) == ["New MG", "Old AP"]
+    assert cached.fetched == NOW
+
+
+def test_total_failure_with_cache_fallback_is_not_all_failed(tmp_path):
+    write_term(tmp_path, "milch", [_deal("Old")], ["marktguru"], NOW - timedelta(days=10))
+    r = _load(tmp_path, ["milch"], [FakeScraper("marktguru", fail=True), FakeScraper("aktionspreis", fail=True)])
+    assert r.all_sources_failed is False
+
+
+def test_expired_online_deals_dropped(tmp_path):
+    expired = Deal("lidl", "Vorbei", 1.0, date(2026, 11, 1), date(2026, 11, 19), "aktionspreis")
+    a = FakeScraper("marktguru", {"milch": [_deal("Aktuell"), expired]})
+    r = _load(tmp_path, ["milch"], [a])
+    assert [d.product_name for d in r.terms["milch"].deals] == ["Aktuell"]
+    assert [d.product_name for d in r.online_deals] == ["Aktuell"]
