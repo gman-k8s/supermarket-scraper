@@ -3,7 +3,8 @@ set -e
 cd "$(dirname "$0")"
 
 uv venv .venv
-uv pip install -r requirements-dev.txt
+# --python: HA core sets UV_SYSTEM_PYTHON, which would otherwise install into the system interpreter
+uv pip install --python .venv/bin/python -r requirements-dev.txt
 
 # Seed config/ from config.example/ without overwriting existing files
 mkdir -p config
